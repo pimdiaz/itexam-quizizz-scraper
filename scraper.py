@@ -1,54 +1,53 @@
 import sys
 import re
-import requests
+import asyncio
+from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
 
 def clean_question_text(raw_text):
-    """Strips leading question numbers or labels like '1. ', '12) ', 'Question 3: '."""
+    """Strips leading question numbers like '1. ', '50. ', 'Question 1: ', etc."""
     pattern = r"^\s*(Question\s+\d+[\.\:\-]?\s*|\d+[\.\)\:\-]\s*)"
     return re.sub(pattern, "", raw_text, flags=re.IGNORECASE).strip()
 
-def scrape_exam(url):
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (X11; Linux x86_64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0.0.0 Safari/537.36"
-        ),
-        "Accept": (
-            "text/html,application/xhtml+xml,application/xml;q=0.9,"
-            "image/avif,image/webp,image/apng,*/*;q=0.8"
-        ),
-        "Accept-Language": "en-US,en;q=0.9",
-        "Sec-Ch-Ua": '"Chromium";v="124", "Not-A.Brand";v="99"',
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": '"Linux"',
-        "Sec-Fetch-Dest": "document",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-User": "?1",
-        "Upgrade-Insecure-Requests": "1"
-    }
+async def fetch_full_rendered_html(url):
+    print(f"[*] Launching headless browser for: {url}")
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        )
+        page = await context.new_page()
 
-    print(f"[*] Fetching URL: {url}")
-    try:
-        response = requests.get(url, headers=headers, timeout=15)
-        response.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print(f"[!] Network error: {e}")
-        sys.exit(1)
+        # Navigate to the page
+        await page.goto(url, wait_until="domcontentloaded", timeout=60000)
 
-    soup = BeautifulSoup(response.text, "html.parser")
-    content_area = soup.find("div", class_="entry-content") or soup.find("article")
+        # Scroll down incrementally to trigger FlyingPress lazy-loading
+        print("[*] Scrolling to trigger lazy-loaded questions...")
+        for _ in range(10):
+            await page.evaluate("window.scrollBy(0, document.body.scrollHeight / 10);")
+            await asyncio.sleep(0.5)
+
+        # Ensure we hit the very bottom
+        await page.evaluate("window.scrollTo(0, document.body.scrollHeight);")
+        await asyncio.sleep(2)
+
+        content = await page.content()
+        await browser.close()
+        return content
+
+def parse_html(html):
+    soup = BeautifulSoup(html, "html.parser")
+    content_area = (
+        soup.find("div", class_="thecontent") or 
+        soup.find("div", class_="entry-content") or 
+        soup.find("article")
+    )
 
     if not content_area:
-        print("[!] Could not locate main post content.")
-        sys.exit(1)
+        print("[!] Could not locate content area.")
+        return []
 
-    cards = []
-    question_regex = re.compile(r"^\s*(\d+[\.\)]|Question\s+\d+[:\.]?)", re.IGNORECASE)
-    
-    # Filter for diagram/image-dependent questions
+    # Filter out questions that explicitly require an image/diagram
     image_keywords_regex = re.compile(
         r"\b(refer\s+to\s+the\s+(exhibit|diagram|graphic|figure|image|topology)|"
         r"shown\s+in\s+the\s+(exhibit|diagram|figure)|"
@@ -56,72 +55,65 @@ def scrape_exam(url):
         re.IGNORECASE
     )
 
-    current_question = None
-    current_choices = []
-    has_image = False
+    cards = []
+    
+    # Target all unordered lists
+    for ul in content_area.find_all("ul"):
+        if ul.find_parent(class_=re.compile(r"(sharedaddy|heateor|menu|widget|nav|comments|sidebar)", re.I)):
+            continue
 
-    def should_keep_question(q_text, choices, had_img):
-        """Returns True only if the question has choices, no img tag, and no exhibit keywords."""
-        if not q_text or not choices or had_img:
-            return False
-        if image_keywords_regex.search(q_text):
-            return False
-        return True
+        # Look for the correct_answer class
+        has_correct = False
+        choices = []
 
-    # Traverse child elements in order
-    for element in content_area.find_all(["p", "ul", "ol", "div"]):
-        text = element.get_text(" ", strip=True)
+        # Remove copy buttons injected by scripts
+        for btn in ul.find_all("button", class_=re.compile("copy", re.I)):
+            btn.decompose()
 
-        # Flag presence of an image
-        if element.find("img"):
-            has_image = True
+        for li in ul.find_all("li", recursive=False):
+            choice_text = li.get_text(" ", strip=True)
+            if not choice_text:
+                continue
 
-        # 1. Detect a new question starting
-        if question_regex.match(text):
-            # Evaluate and save previous question
-            if should_keep_question(current_question, current_choices, has_image):
-                cards.append({
-                    "question": clean_question_text(current_question),
-                    "choices": current_choices
-                })
+            is_correct = (
+                "correct_answer" in li.get("class", []) or
+                bool(li.find(class_=re.compile(r"correct_answer", re.I))) or
+                bool(li.find(["strong", "b"]))
+            )
 
-            current_question = text
-            current_choices = []
-            has_image = bool(element.find("img"))
+            if is_correct:
+                choice_text = f"*{choice_text}"
+                has_correct = True
 
-        # 2. Detect the choices list (ul or ol)
-        elif element.name in ["ul", "ol"] and current_question:
-            if element.find("img"):
-                has_image = True
+            choices.append(choice_text)
 
-            for li in element.find_all("li"):
-                choice_text = li.get_text(" ", strip=True)
-                if not choice_text:
-                    continue
+        if not choices or not has_correct:
+            continue
 
-                # Check if choice or any child has class 'correct_answer'
-                has_correct_class = (
-                    "correct_answer" in li.get("class", []) or
-                    bool(li.find(class_="correct_answer"))
-                )
+        # Find the question paragraph preceding this list
+        q_text = None
+        for prev in ul.find_all_previous(["p", "h2", "h3", "h4"]):
+            text = prev.get_text(" ", strip=True)
+            if len(text) < 15:
+                continue
+            if re.search(r'^(Explanation|How to find|Note:|Advertisements)', text, re.IGNORECASE):
+                continue
+            q_text = text
+            break
 
-                if has_correct_class:
-                    choice_text = f"*{choice_text}"
+        if not q_text or image_keywords_regex.search(q_text):
+            continue
 
-                current_choices.append(choice_text)
-
-    # Process the final question block after loop ends
-    if should_keep_question(current_question, current_choices, has_image):
         cards.append({
-            "question": clean_question_text(current_question),
-            "choices": current_choices
+            "question": clean_question_text(q_text),
+            "choices": choices
         })
 
     return cards
 
 def save_output(cards, output_txt="questions_with_answers.txt"):
     if not cards:
-        print("[!] No text-only questions found.")
+        print("[!] No questions extracted.")
         return
 
     with open(output_txt, "w", encoding="utf-8") as f:
@@ -131,14 +123,18 @@ def save_output(cards, output_txt="questions_with_answers.txt"):
                 f.write(f"{choice}\n")
             f.write("\n")
 
-    print(f"[+] Successfully extracted {len(cards)} clean questions (without numbers).")
-    print(f"[+] Saved output to: {output_txt}")
+    print(f"[+] Successfully extracted {len(cards)} clean questions!")
+    print(f"[+] Output written to: {output_txt}")
 
-if __name__ == "__main__":
+async def main():
     if len(sys.argv) > 1:
         target_url = sys.argv[1]
     else:
         target_url = input("Enter exam URL: ").strip()
 
-    extracted_cards = scrape_exam(target_url)
-    save_output(extracted_cards)
+    html = await fetch_full_rendered_html(target_url)
+    cards = parse_html(html)
+    save_output(cards)
+
+if __name__ == "__main__":
+    asyncio.run(main())
