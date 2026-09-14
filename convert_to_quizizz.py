@@ -1,90 +1,84 @@
-import pandas as pd
 import sys
 import os
+import re
+import pandas as pd
 
-def parse_text_to_quizizz_df(input_txt_file):
-    with open(input_txt_file, 'r', encoding='utf-8') as f:
-        content = f.read().strip()
-    
-    # Split the file by double newlines to separate questions
-    blocks = content.split('\n\n')
-    
-    quizizz_rows = []
-    
+def parse_txt_to_quizizz(txt_filepath):
+    if not os.path.exists(txt_filepath):
+        print(f"[!] File not found: {txt_filepath}")
+        sys.exit(1)
+
+    with open(txt_filepath, "r", encoding="utf-8") as f:
+        raw_text = f.read()
+
+    blocks = [b.strip() for b in raw_text.split("\n\n") if b.strip()]
+    rows = []
+
     for block in blocks:
-        lines = block.strip().split('\n')
-        if len(lines) < 2:
+        lines = [line.strip() for line in block.split("\n") if line.strip()]
+        if len(lines) < 3:
             continue
-            
-        question_text = lines[0].strip()
-        choices = lines[1:]
-        
+
+        question_text = lines[0]
+        image_url = ""
+        choice_lines = []
+
+        for line in lines[1:]:
+            img_match = re.match(r"^\[IMAGE:\s*(https?://[^\s\]]+)\]", line, re.IGNORECASE)
+            if img_match:
+                image_url = img_match.group(1)
+            else:
+                choice_lines.append(line)
+
+        options = []
         correct_answers = []
-        option_columns = ["", "", "", "", ""] # Quizizz allows up to 5 options
-        
-        # Determine options and correct answer indices
-        for idx, choice in enumerate(choices):
-            if idx >= 5: # Quizizz maxes out at 5 options
-                break
-                
-            clean_choice = choice.strip()
-            if clean_choice.startswith('*'):
-                correct_answers.append(str(idx + 1))
-                clean_choice = clean_choice[1:] # Remove the asterisk
-                
-            option_columns[idx] = clean_choice
-            
-        # Determine question type
-        if len(correct_answers) > 1:
-            q_type = "Checkbox"
-        else:
-            q_type = "Multiple Choice"
-            
-        correct_answer_str = ",".join(correct_answers)
-        
-        # Build the row dictionary according to the Quizizz template
+
+        for idx, line in enumerate(choice_lines, start=1):
+            if line.startswith("*"):
+                options.append(line.lstrip("*").strip())
+                correct_answers.append(str(idx))
+            else:
+                options.append(line)
+
+        if not correct_answers or len(options) < 2:
+            continue
+
+        # Quizizz expects "Checkbox" for multiple correct answers
+        question_type = "Checkbox" if len(correct_answers) > 1 else "Multiple Choice"
+        correct_ans_str = ",".join(correct_answers)
+
         row = {
             "Question Text": question_text,
-            "Question Type": q_type,
-            "Option 1": option_columns[0],
-            "Option 2": option_columns[1],
-            "Option 3": option_columns[2],
-            "Option 4": option_columns[3],
-            "Option 5": option_columns[4],
-            "Correct Answer": correct_answer_str,
+            "Question Type": question_type,
+            "Option 1": options[0] if len(options) > 0 else "",
+            "Option 2": options[1] if len(options) > 1 else "",
+            "Option 3": options[2] if len(options) > 2 else "",
+            "Option 4": options[3] if len(options) > 3 else "",
+            "Option 5": options[4] if len(options) > 4 else "",
+            "Correct Answer": correct_ans_str,
             "Time in seconds": 45,
-            "Image Link": "",
-            "Answer explanation": ""
+            "Image Link": image_url
         }
-        quizizz_rows.append(row)
-        
-    df = pd.DataFrame(quizizz_rows)
-    return df
+        rows.append(row)
 
-def save_to_excel(df, output_filename="quizizz_import.xlsx"):
-    # Create the exact header structure expected by Quizizz
-    headers = [
-        "Question Text", "Question Type", 
-        "Option 1", "Option 2", "Option 3", "Option 4", "Option 5", 
-        "Correct Answer", "Time in seconds", "Image Link", "Answer explanation"
+    columns = [
+        "Question Text",
+        "Question Type",
+        "Option 1",
+        "Option 2",
+        "Option 3",
+        "Option 4",
+        "Option 5",
+        "Correct Answer",
+        "Time in seconds",
+        "Image Link"
     ]
-    
-    # Reorder columns to ensure exact match
-    df = df[headers]
-    
-    # Save to Excel
-    df.to_excel(output_filename, index=False, sheet_name="Create a Quiz")
-    print(f"Successfully converted {len(df)} questions to {output_filename}")
+
+    df = pd.DataFrame(rows, columns=columns)
+    output_xlsx = "quizizz_import.xlsx"
+    df.to_excel(output_xlsx, index=False)
+    print(f"[+] Converted {len(rows)} questions into '{output_xlsx}' with Image Links included!")
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        input_file = sys.argv[1]
-    else:
-        input_file = "questions_with_answers.txt"
-        
-    if not os.path.exists(input_file):
-        print(f"Error: Could not find input file '{input_file}'")
-        sys.exit(1)
-        
-    df = parse_text_to_quizizz_df(input_file)
-    save_to_excel(df, "quizizz_import.xlsx")
+    filepath = sys.argv[1] if len(sys.argv) > 1 else "questions_with_answers.txt"
+    parse_txt_to_quizizz(filepath)

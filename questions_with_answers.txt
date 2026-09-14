@@ -1,0 +1,321 @@
+The IT department is reporting that a company web server is receiving an abnormally high number of web page requests from different locations simultaneously. Which type of security attack is occurring?
+adware
+*DDoS
+phishing
+social engineering
+spyware
+
+What causes a buffer overflow?
+launching a security countermeasure to mitigate a Trojan horse
+downloading and installing too many software updates at one time
+*attempting to write more data to a memory location than that location can hold
+sending too much information to two or more interfaces of the same device, thereby causing dropped packets
+sending repeated connections such as Telnet to a particular device, thus denying other data sources
+
+Which objective of secure communications is achieved by encrypting data?
+authentication
+availability
+*confidentiality
+integrity
+
+What type of malware has the primary objective of spreading across the network?
+*worm
+virus
+Trojan horse
+botnet
+
+What commonly motivates cybercriminals to attack networks as compared to hactivists or state-sponsored hackers?
+*financial gain
+fame seeking
+status among peers
+political reasons
+
+Which type of hacker is motivated to protest against political and social issues?
+*hacktivist
+cybercriminal
+script kiddie
+vulnerability broker
+
+What is a ping sweep?
+a query and response protocol that identifies information about a domain, including the addresses that are assigned to that domain.
+a scanning technique that examines a range of TCP or UDP port numbers on a host to detect listening services.
+a software application that enables the capture of all network packets that are sent across a LAN.
+*a network scanning technique that indicates the live hosts in a range of IP addresses.
+
+In what type of attack is a cybercriminal attempting to prevent legitimate users from accessing network services?
+address spoofing
+MITM
+session hijacking
+*DoS
+
+Which requirement of secure communications is ensured by the implementation of MD5 or SHA hash generating algorithms?​
+nonrepudiation
+authentication
+*integrity
+confidentiality
+
+If an asymmetric algorithm uses a public key to encrypt data, what is used to decrypt it?
+a digital certificate
+a different public key
+*a private key
+DH
+
+Which two packet filters could a network administrator use on an IPv4 extended ACL? (Choose two.)
+*destination UDP port number
+computer type
+destination MAC address
+*ICMP message type
+source TCP hello address
+
+What type of ACL offers greater flexibility and control over network access?
+numbered standard
+named standard
+*extended
+flexible
+
+What is the quickest way to remove a single ACE from a named ACL?
+*Use the no keyword and the sequence number of the ACE to be removed.
+Copy the ACL into a text editor, remove the ACE, then copy the ACL back into the router.
+Create a new ACL with a different number and apply the new ACL to the router interface.
+Use the no access-list command to remove the entire ACL, then recreate it without the ACE.
+
+A network administrator needs to configure a standard ACL so that only the workstation of the administrator with the IP address 192.168.15.23 can access the virtual terminal of the main router. Which two configuration commands can achieve the task? (Choose two.)
+*Router1(config)# access-list 10 permit 192.168.15.23 0.0.0.0
+Router1(config)# access-list 10 permit 192.168.15.23 0.0.0.255
+Router1(config)# access-list 10 permit 192.168.15.23 255.255.255.255
+*Router1(config)# access-list 10 permit host 192.168.15.23
+Router1(config)# access-list 10 permit 192.168.15.23 255.255.255.0
+
+A network administrator is writing a standard ACL that will deny any traffic from the 172.16.0.0/16 network, but permit all other traffic. Which two commands should be used? (Choose two.)
+Router(config)# access-list 95 deny 172.16.0.0 255.255.0.0
+*Router(config)# access-list 95 permit any
+Router(config)# access-list 95 host 172.16.0.0
+*Router(config)# access-list 95 deny 172.16.0.0 0.0.255.255
+Router(config)# access-list 95 172.16.0.0 255.255.255.255
+Router(config)# access-list 95 deny any
+
+Which two actions are taken if the access list is placed inbound on a router Gigabit Ethernet port that has the IP address 192.168.10.254 assigned? (Choose two.)
+Only Layer 3 connections are allowed to be made from the router to any other network device.
+Devices on the 192.168.10.0/24 network are not allowed to reply to any ping requests.
+Devices on the 192.168.10.0/24 network can sucessfully ping devices on the 192.168.11.0 network.
+*A Telnet or SSH session is allowed from any device on the 192.168.10.0 into the router with this access list assigned.
+*Devices on the 192.168.10.0/24 network are allowed to reply to any ping requests.
+Only the network device assigned the IP address 192.168.10.1 is allowed to access the router.
+
+In which TCP attack is the cybercriminal attempting to overwhelm a target host with half-open TCP connections?
+port scan attack
+*SYN flood attack
+session hijacking attack
+reset attack
+
+Which protocol is attacked when a cybercriminal provides an invalid gateway in order to create a man-in-the-middle attack?
+*DHCP
+DNS
+ICMP
+HTTP or HTTPS
+
+Which statement describes a characteristic of standard IPv4 ACLs?
+They are configured in the interface configuration mode.
+They can be configured to filter traffic based on both source IP addresses and source ports.
+They can be created with a number but not with a name.
+*They filter traffic based on source IP addresses only.
+
+What is considered a best practice when configuring ACLs on vty lines?
+*Place identical restrictions on all vty lines.
+Remove the vty password since the ACL restricts access to trusted users.
+Apply the ip access-group command inbound.
+Use only extended access lists.
+
+Which two conclusions can be drawn from this new configuration?​ (Choose two.)
+TFTP packets will be permitted.​
+*Ping packets will be permitted.
+Telnet packets will be permitted.
+*SSH packets will be permitted.
+All TCP and UDP packets will be denied.​
+
+Which set of access control entries would allow all users on the 192.168.10.0/24 network to access a web server that is located at 172.17.80.1, but would not allow them to use Telnet?
+*access-list 103 permit tcp 192.168.10.0 0.0.0.255 host 172.17.80.1 eq 80 access-list 103 deny tcp ​192.168.10.0 0.0.0.255 any eq 23
+
+What is the term used to describe a mechanism that takes advantage of a vulnerability?
+mitigation
+*exploit
+vulnerability
+threat
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the any configuration option or command?
+to add a text entry for documentation purposes
+to generate and send an informational message whenever the ACE is matched
+*to identify any IP address
+to identify one specific IP address
+
+Which statement accurately characterizes the evolution of threats to network security?
+Internet architects planned for network security from the beginning.
+Early Internet users often engaged in activities that would harm other users.
+*Internal threats can cause even greater damage than external threats.
+Threats have become less sophisticated while the technical knowledge needed by an attacker has grown.
+
+A user receives a phone call from a person who claims to represent IT services and then asks that user for confirmation of username and password for auditing purposes. Which security threat does this phone call represent?
+spam
+*social engineering
+DDoS
+anonymous keylogging
+
+In what way are zombies used in security attacks?
+They target specific individuals to gain corporate or personal information.
+They probe a group of machines for open ports to learn which services are running.
+They are maliciously formed code segments used to replace legitimate applications.
+*They are infected machines that carry out a DDoS attack.
+
+Which attack involves threat actors positioning themselves between a source and destination with the intent of transparently monitoring, capturing, and controlling the communication?
+*man-in-the-middle attack
+SYN flood attack
+DoS attack
+ICMP attack
+
+Which two keywords can be used in an access control list to replace a wildcard mask or address and wildcard mask pair? (Choose two.)
+*host
+most
+gt
+some
+*any
+all
+
+Which statement describes a difference between the operation of inbound and outbound ACLs?
+*Inbound ACLs are processed before the packets are routed while outbound ACLs are processed after the routing is completed.
+In contrast to outbound ALCs, inbound ACLs can be used to filter packets with multiple criteria.
+On a network interface, more than one inbound ACL can be configured but only one outbound ACL can be configured.
+Inbound ACLs can be used in both routers and switches but outbound ACLs can be used only on routers.
+
+What effect would the Router1(config-ext-nacl)# permit tcp 172.16.4.0 0.0.0.255 any eq www command have when implemented inbound on the f0/0 interface?
+All TCP traffic is permitted, and all other traffic is denied.
+*Traffic originating from 172.16.4.0/24 is permitted to all TCP port 80 destinations.
+All traffic from 172.16.4.0/24 is permitted anywhere on any port.
+The command is rejected by the router because it is incomplete.
+
+Which ACE will permit a packet that originates from any network and is destined for a web server at 192.168.1.1?
+*access-list 101 permit tcp any host 192.168.1.1 eq 80
+access-list 101 permit tcp host 192.168.1.1 eq 80 any
+access-list 101 permit tcp host 192.168.1.1 any eq 80
+access-list 101 permit tcp any eq 80 host 192.168.1.1
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the access-class 20 in configuration option or command?
+*to secure administrative access to the router
+to remove an ACL from an interface
+to remove a configured ACL
+to apply a standard ACL to an interface
+
+What is the term used to describe the same pre-shared key or secret key, known by both the sender and receiver to encrypt and decrypt data?
+*symmetric encryption algorithm
+data integrity
+exploit
+risk
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the ‘ip access-group 101 in’ configuration option or command?
+*to apply an extended ACL to an interface
+to secure management traffic into the router
+to secure administrative access to the router
+to display all restricted traffic
+
+In which type of attack is falsified information used to redirect users to malicious Internet sites?
+DNS amplification and reflection
+ARP cache poisoning
+*DNS cache poisoning
+domain generation
+
+What is a feature of an IPS?
+*It can stop malicious packets.
+It is deployed in offline mode.
+It has no impact on latency.
+It is primarily focused on identifying possible incidents.
+
+What is the term used to describe a potential danger to a company’s assets, data, or network functionality?
+vulnerability
+*threat
+asset
+exploit
+
+What does the CLI prompt change to after entering the command ip access-list standard aaa from global configuration mode?
+Router(config-line)#
+*Router(config-std-nacl)#
+Router(config)#
+Router(config-router)#
+Router(config-if)#
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the 40 deny host 192.168.23.8 configuration option or command?
+to remove all ACLs from the router
+*to create an entry in a numbered ACL
+to apply an ACL to all router interfaces
+to secure administrative access to the router
+
+What is the best description of Trojan horse malware?
+It is malware that can only be distributed over the Internet.
+*It appears as useful software but hides malicious code.
+It is software that causes annoying but not fatal computer problems.
+It is the most easily detected form of malware.
+
+What wild card mask will match networks 172.16.0.0 through 172.19.0.0?
+0.0.3.255
+0.252.255.255
+*0.3.255.255
+0.0.255.255
+
+What is the term used to describe gray hat hackers who publicly protest organizations or governments by posting articles, videos, leaking sensitive information, and performing network attacks?
+white hat hackers
+grey hat hackers
+*hacktivists
+state-sponsored hacker
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the no ip access-list 101 configuration option or command?
+to apply an ACL to all router interfaces
+to secure administrative access to the router
+to remove all ACLs from the router
+*to remove a configured ACL
+
+What is the term used to describe unethical criminals who compromise computer and network security for personal gain, or for malicious reasons?
+hacktivists
+vulnerability broker
+*black hat hackers
+script kiddies
+
+What is the term used to describe a guarantee that the message is not a forgery and does actually come from whom it states?
+*origin authentication
+mitigation
+exploit
+data non-repudiation
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the ip access-group 101 in configuration option or command?
+to secure administrative access to the router
+*to apply an extended ACL to an interface
+to display all restricted traffic
+to secure management traffic into the router
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the remark configuration option or command?
+to generate and send an informational message whenever the ACE is matched
+*to add a text entry for documentation purposes
+to identify one specific IP address
+to restrict specific traffic access through an interface
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the established configuration option or command?
+to add a text entry for documentation purposes
+to display all restricted traffic
+to allow specified traffic through an interface
+*to allow returning reply traffic to enter the internal network
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the deny configuration option or command?
+to identify one specific IP address
+to display all restricted traffic
+*to restrict specific traffic access through an interface
+to generate and send an informational message whenever the ACE is matched
+
+A technician is tasked with using ACLs to secure a router. When would the technician use the host configuration option or command?
+to add a text entry for documentation purposes
+to generate and send an informational message whenever the ACE is matched
+to identify any IP address
+*to identify one specific IP address
+
+What commonly motivates cybercriminals to attack networks as compared to hacktivists or state-sponsored hackers?
+*financial gain
+political reasons
+fame seeking
+status among peers
+
